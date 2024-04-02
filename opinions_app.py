@@ -1,6 +1,6 @@
 import random
 import json
-from flask import Flask
+from flask import Flask, render_template
 from datetime import datetime
 
 # class to work with ORM
@@ -33,7 +33,7 @@ def root():
 
     opinion = Opinion.query.offset(offset_value).first()
 
-    return opinion.text
+    return render_template("index.html", opinion=opinion)
 
 
 if __name__ == "__main__":
