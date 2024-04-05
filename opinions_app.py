@@ -23,7 +23,7 @@ class Opinion(db.Model):
 
 
 @app.route("/")
-def root():
+def index_view():
     count = Opinion.query.count()
 
     if not count:
@@ -34,6 +34,11 @@ def root():
     opinion = Opinion.query.offset(offset_value).first()
 
     return render_template("index.html", opinion=opinion)
+
+@app.route("/add")
+def add_opinion_view():
+    return render_template("add.html")
+
 
 
 if __name__ == "__main__":
