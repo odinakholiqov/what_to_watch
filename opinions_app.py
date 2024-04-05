@@ -1,6 +1,6 @@
 import random
 import json
-from flask import Flask, render_template, redirect, url_for
+from flask import Flask, render_template, redirect, url_for, flash, abort
 from datetime import datetime
 from flask_wtf import FlaskForm
 from wtforms import StringField, SubmitField, TextAreaField, URLField
@@ -30,6 +30,18 @@ class OpinionForm(FlaskForm):
     submit = SubmitField("Enter")
 
 
+@app.errorhandler(404)
+def page_not_found(error):
+
+    return render_template("404.html"), 404
+
+
+@app.errorhandler(500)
+def page_not_found(error):
+    db.session.rollback()
+    return render_template("500.html"), 500
+
+
 class Opinion(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(128), nullable=False)
@@ -43,7 +55,7 @@ def index_view():
     count = Opinion.query.count()
 
     if not count:
-        return "No movies in DB"
+        abort(404)
 
     offset_value = random.randrange(count)
 
@@ -65,6 +77,13 @@ def add_opinion_view():
     form = OpinionForm()
 
     if form.validate_on_submit():
+        text = form.text.data
+
+        if Opinion.query.filter_by(text=text).first() is not None:
+            flash("Such opinion already exists")
+
+            return render_template("add_opinion.html", form=form)
+
         opinion = Opinion(
             title=form.title.data, text=form.text.data, source=form.source.data
         )
